@@ -5,10 +5,33 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registro de Ventas</title>
     <link rel="stylesheet" href="styles.css">
+    <style>
+        /* CSS para alinear el botón en la parte superior derecha */
+        .container {
+            position: relative;
+        }
+        .clear-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 10px 20px;
+            font-size: 14px;
+            border: none;
+            border-radius: 5px;
+            background-color: #dc3545;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .clear-button:hover {
+            background-color: #c82333;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
         <h1>Registro de Ventas</h1>
+        <button class="clear-button" onclick="clearVentas()">Limpiar Ventas</button>
         <div class="registro-container">
             <table id="registro-ventas">
                 <thead>
@@ -51,6 +74,14 @@
         // Mostrar el total recaudado
         const totalRecaudado = ventas.reduce((acc, venta) => acc + venta.total, 0);
         document.getElementById('totalRecaudado').textContent = totalRecaudado;
+
+        // Función para limpiar las ventas del localStorage
+        function clearVentas() {
+            if (confirm('¿Estás seguro de que quieres limpiar todas las ventas?')) {
+                localStorage.removeItem('ventas');
+                location.reload(); // Recargar la página para actualizar la tabla
+            }
+        }
     </script>
 </body>
 </html>
