@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Total General</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Total General de Ventas</h1>
+        </div>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Producto</th>
+                        <th>Cantidad Vendida</th>
+                        <th>Ganancia</th>
+                    </tr>
+                </thead>
+                <tbody id="ventas-body">
+                    <!-- Las filas de la tabla se insertarán aquí dinámicamente -->
+                </tbody>
+            </table>
+        </div>
+        <div class="botones-container">
+            <button onclick="location.href='index.html';">Volver</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const ventas = JSON.parse(localStorage.getItem('ventas')) || [];
+            const precios = JSON.parse(localStorage.getItem('precios')) || {
+                "Producto 1": 10,
+                "Producto 2": 20,
+                "Producto 3": 30,
+                "Producto 4": 40,
+                "Producto 5": 50
+            };
+            const ventasBody = document.getElementById('ventas-body');
+
+            const productoVentas = {};
+
+            // Agregar las ventas a la tabla
+            ventas.forEach(venta => {
+                venta.productos.forEach(producto => {
+                    if (!productoVentas[producto.nombre]) {
+                        productoVentas[producto.nombre] = {
+                            cantidad: 0,
+                            ganancia: 0
+                        };
+                    }
+                    productoVentas[producto.nombre].cantidad += producto.cantidad;
+                    productoVentas[producto.nombre].ganancia += producto.cantidad * precios[producto.nombre];
+                });
+            });
+
+            for (const producto in productoVentas) {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${producto}</td>
+                    <td>${productoVentas[producto].cantidad}</td>
+                    <td>Bs${productoVentas[producto].ganancia.toFixed(2)}</td>
+                `;
+                ventasBody.appendChild(tr);
+            }
+        });
+    </script>
+</body>
+</html>

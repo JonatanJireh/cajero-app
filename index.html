@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aplicación de Cajero</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Aplicación de Cajero</h1>
+            <img src="cajero.jpg" alt="Cajero" class="cajero-image">
+        </div>
+        <div class="botones-arriba-container">
+            <div class="boton-arriba"><a href="RegistroVentas.html" class="registro-link">Ver registro de ventas</a></div>
+            <div class="boton-arriba"><button onclick="location.href='TotalGeneral2.html';" class="ver-total">Ver Total General</button></div>
+        </div>
+        <div class="product-container">
+            <button data-precio="10" onclick="incrementar('contador1', 10)">Producto 1 (Bs 10)</button>
+            <button onclick="decrementar('contador1', 10)">-</button>
+            <input type="number" id="contador1" class="product-input" value="0" readonly>
+        </div>
+        <div class="product-container">
+            <button data-precio="20" onclick="incrementar('contador2', 20)">Producto 2 (Bs 20)</button>
+            <button onclick="decrementar('contador2', 20)">-</button>
+            <input type="number" id="contador2" class="product-input" value="0" readonly>
+        </div>
+        <div class="product-container">
+            <button data-precio="30" onclick="incrementar('contador3', 30)">Producto 3 (Bs 30)</button>
+            <button onclick="decrementar('contador3', 30)">-</button>
+            <input type="number" id="contador3" class="product-input" value="0" readonly>
+        </div>
+        <div class="product-container">
+            <button data-precio="40" onclick="incrementar('contador4', 40)">Producto 4 (Bs 40)</button>
+            <button onclick="decrementar('contador4', 40)">-</button>
+            <input type="number" id="contador4" class="product-input" value="0" readonly>
+        </div>
+        <div class="product-container">
+            <button data-precio="50" onclick="incrementar('contador5', 50)">Producto 5 (Bs 50)</button>
+            <button onclick="decrementar('contador5', 50)">-</button>
+            <input type="number" id="contador5" class="product-input" value="0" readonly>
+        </div>
+        <div class="total-container">
+            <h2>Total: Bs<span id="total">0</span></h2>
+        </div>
+        <div class="efectivo-container">
+            <label for="efectivo">Efectivo recibido: Bs</label>
+            <input type="number" id="efectivo" oninput="calcularCambio()">
+        </div>
+        <div class="cambio-container">
+            <h2>Cambio: Bs<span id="cambio">0</span></h2>
+        </div>
+        <div class="botones-container">
+            <button onclick="registrarVenta()">Registrar Venta</button>
+        </div>
+    </div>
+
+    <script>
+        // Función para incrementar el valor del input
+        function incrementar(idInput, precio) {
+            const input = document.getElementById(idInput);
+            const valor = parseInt(input.value);
+            input.value = valor + 1;
+            actualizarTotal(precio);
+        }
+    
+        // Función para decrementar el valor del input
+        function decrementar(idInput, precio) {
+            const input = document.getElementById(idInput);
+            const valor = parseInt(input.value);
+            if (valor > 0) {
+                input.value = valor - 1;
+                actualizarTotal(-precio);
+            }
+        }
+    
+        // Función para actualizar el total
+        function actualizarTotal(precio) {
+            const totalElement = document.getElementById('total');
+            const total = parseFloat(totalElement.textContent);
+            totalElement.textContent = (total + precio).toFixed(2);
+        }
+    
+        // Función para calcular el cambio
+        function calcularCambio() {
+            const total = parseFloat(document.getElementById('total').textContent);
+            const efectivo = parseFloat(document.getElementById('efectivo').value);
+            const cambio = efectivo - total;
+            document.getElementById('cambio').textContent = cambio.toFixed(2);
+        }
+    
+        // Función para registrar la venta
+        function registrarVenta() {
+            const productos = [];
+            const inputs = document.querySelectorAll('.product-input');
+            const precios = {
+                "Producto 1": 10,
+                "Producto 2": 20,
+                "Producto 3": 30,
+                "Producto 4": 40,
+                "Producto 5": 50
+            };
+            inputs.forEach(input => {
+                const cantidad = parseInt(input.value);
+                if (cantidad > 0) {
+                    const id = input.id;
+                    const productoIndex = id[id.length - 1];
+                    const nombreProducto = `Producto ${productoIndex}`;
+                    const precio = precios[nombreProducto];
+                    const total = cantidad * precio;
+                    productos.push({
+                        nombre: nombreProducto,
+                        cantidad: cantidad,
+                        precio: precio,
+                        total: total
+                    });
+                }
+            });
+
+            const total = parseFloat(document.getElementById('total').textContent);
+            const venta = {
+                productos: productos,
+                total: total
+            };
+
+            const ventas = JSON.parse(localStorage.getItem('ventas')) || [];
+            ventas.push(venta);
+            localStorage.setItem('ventas', JSON.stringify(ventas));
+
+            // Limpiar los inputs
+            inputs.forEach(input => input.value = 0);
+            document.getElementById('total').textContent = '0.00';
+            document.getElementById('efectivo').value = '';
+            document.getElementById('cambio').textContent = '0.00';
+            alert('Venta registrada correctamente.');
+        }
+    </script>
+</body>
+</html>
