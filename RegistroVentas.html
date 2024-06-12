@@ -5,33 +5,68 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registro de Ventas</title>
     <link rel="stylesheet" href="styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
     <style>
-        /* CSS para alinear el botón en la parte superior derecha */
+        /* CSS para alinear los botones en la parte superior */
         .container {
             position: relative;
+            padding-top: 20px; /* Espacio para los botones */
         }
-        .clear-button {
-            position: absolute;
-            top: 10px;
-            right: 10px;
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .header h1 {
+            margin: 0;
+        }
+        .cajero-image {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+        }
+        .button-container {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 20px;
+        }
+        .clear-button, .export-button {
             padding: 10px 20px;
             font-size: 14px;
             border: none;
             border-radius: 5px;
-            background-color: #dc3545;
             color: white;
             cursor: pointer;
             transition: background-color 0.3s;
+            margin-left: 10px; /* Espacio entre los botones */
+        }
+        .clear-button {
+            background-color: #dc3545;
         }
         .clear-button:hover {
             background-color: #c82333;
+        }
+        .export-button {
+            background-color: #007bff;
+        }
+        .export-button:hover {
+            background-color: #0056b3;
+        }
+        .registro-container {
+            margin-top: 20px; /* Espacio después de los botones */
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Registro de Ventas</h1>
-        <button class="clear-button" onclick="clearVentas()">Limpiar Ventas</button>
+        <div class="header">
+            <h1>Registro de Ventas</h1>
+            <img src="cajero.jpg" alt="Cajero" class="cajero-image">
+        </div>
+        <div class="button-container">
+            <button class="clear-button" onclick="clearVentas()">Limpiar Ventas</button>
+            <button class="export-button" onclick="exportToExcel()">Exportar a Excel</button>
+        </div>
         <div class="registro-container">
             <table id="registro-ventas">
                 <thead>
@@ -81,6 +116,14 @@
                 localStorage.removeItem('ventas');
                 location.reload(); // Recargar la página para actualizar la tabla
             }
+        }
+
+        // Función para exportar los datos a Excel
+        function exportToExcel() {
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.table_to_sheet(document.getElementById('registro-ventas'));
+            XLSX.utils.book_append_sheet(wb, ws, "Ventas");
+            XLSX.writeFile(wb, "RegistroDeVentas.xlsx");
         }
     </script>
 </body>
