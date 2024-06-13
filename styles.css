@@ -101,6 +101,7 @@ label {
 .registro-container {
     max-height: 300px;
     overflow-y: auto;
+    top: 400px;
 }
 
 table {

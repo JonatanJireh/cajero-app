@@ -33,18 +33,26 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const ventas = JSON.parse(localStorage.getItem('ventas')) || [];
-            const precios = JSON.parse(localStorage.getItem('precios')) || {
+            const productosPersonalizados = JSON.parse(localStorage.getItem('productosPersonalizados')) || [];
+            
+            let precios = {
                 "Producto 1": 10,
                 "Producto 2": 20,
                 "Producto 3": 30,
                 "Producto 4": 40,
                 "Producto 5": 50
             };
+
+            // Incorporar precios de productos personalizados
+            productosPersonalizados.forEach(producto => {
+                precios[producto.nombre] = producto.precio;
+            });
+
             const ventasBody = document.getElementById('ventas-body');
 
             const productoVentas = {};
 
-            // Agregar las ventas a la tabla
+            // Calcular ventas y ganancias
             ventas.forEach(venta => {
                 venta.productos.forEach(producto => {
                     if (!productoVentas[producto.nombre]) {
@@ -58,6 +66,7 @@
                 });
             });
 
+            // Agregar datos a la tabla
             for (const producto in productoVentas) {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `

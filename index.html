@@ -16,47 +16,40 @@
             <div class="boton-arriba"><a href="RegistroVentas.html" class="registro-link">Ver registro de ventas</a></div>
             <div class="boton-arriba"><button onclick="location.href='TotalGeneral2.html';" class="ver-total">Ver Total General</button></div>
         </div>
-        <div class="product-container">
-            <button data-precio="10" onclick="incrementar('contador1', 10)">Producto 1 (Bs 10)</button>
-            <button onclick="decrementar('contador1', 10)">-</button>
-            <input type="number" id="contador1" class="product-input" value="0" readonly>
-        </div>
-        <div class="product-container">
-            <button data-precio="20" onclick="incrementar('contador2', 20)">Producto 2 (Bs 20)</button>
-            <button onclick="decrementar('contador2', 20)">-</button>
-            <input type="number" id="contador2" class="product-input" value="0" readonly>
-        </div>
-        <div class="product-container">
-            <button data-precio="30" onclick="incrementar('contador3', 30)">Producto 3 (Bs 30)</button>
-            <button onclick="decrementar('contador3', 30)">-</button>
-            <input type="number" id="contador3" class="product-input" value="0" readonly>
-        </div>
-        <div class="product-container">
-            <button data-precio="40" onclick="incrementar('contador4', 40)">Producto 4 (Bs 40)</button>
-            <button onclick="decrementar('contador4', 40)">-</button>
-            <input type="number" id="contador4" class="product-input" value="0" readonly>
-        </div>
-        <div class="product-container">
-            <button data-precio="50" onclick="incrementar('contador5', 50)">Producto 5 (Bs 50)</button>
-            <button onclick="decrementar('contador5', 50)">-</button>
-            <input type="number" id="contador5" class="product-input" value="0" readonly>
+        <div id="productos-container">
+            <!-- Aquí se cargarán dinámicamente los productos -->
         </div>
         <div class="total-container">
-            <h2>Total: Bs<span id="total">0</span></h2>
+            <h2>Total: Bs<span id="total">0.00</span></h2>
         </div>
         <div class="efectivo-container">
             <label for="efectivo">Efectivo recibido: Bs</label>
             <input type="number" id="efectivo" oninput="calcularCambio()">
         </div>
         <div class="cambio-container">
-            <h2>Cambio: Bs<span id="cambio">0</span></h2>
+            <h2>Cambio: Bs<span id="cambio">0.00</span></h2>
         </div>
         <div class="botones-container">
             <button onclick="registrarVenta()">Registrar Venta</button>
+            <button onclick="location.href='productos.html';">Agregar Producto</button>
         </div>
     </div>
 
     <script>
+        // Contador global para identificar productos personalizados
+        let productoIndex = 0;
+
+        // Función para cargar productos personalizados desde localStorage
+        function cargarProductosPersonalizados() {
+            const productosPersonalizados = JSON.parse(localStorage.getItem('productosPersonalizados')) || [];
+            productosPersonalizados.forEach(producto => agregarProductoDom(producto.nombre, producto.precio, producto.index));
+        }
+
+        // Función para guardar productos personalizados en localStorage
+        function guardarProductosPersonalizados(productos) {
+            localStorage.setItem('productosPersonalizados', JSON.stringify(productos));
+        }
+
         // Función para incrementar el valor del input
         function incrementar(idInput, precio) {
             const input = document.getElementById(idInput);
@@ -64,7 +57,7 @@
             input.value = valor + 1;
             actualizarTotal(precio);
         }
-    
+
         // Función para decrementar el valor del input
         function decrementar(idInput, precio) {
             const input = document.getElementById(idInput);
@@ -74,14 +67,15 @@
                 actualizarTotal(-precio);
             }
         }
-    
+
         // Función para actualizar el total
         function actualizarTotal(precio) {
             const totalElement = document.getElementById('total');
-            const total = parseFloat(totalElement.textContent);
-            totalElement.textContent = (total + precio).toFixed(2);
+            let total = parseFloat(totalElement.textContent);
+            total += precio;
+            totalElement.textContent = total.toFixed(2);
         }
-    
+
         // Función para calcular el cambio
         function calcularCambio() {
             const total = parseFloat(document.getElementById('total').textContent);
@@ -89,25 +83,18 @@
             const cambio = efectivo - total;
             document.getElementById('cambio').textContent = cambio.toFixed(2);
         }
-    
+
         // Función para registrar la venta
         function registrarVenta() {
             const productos = [];
             const inputs = document.querySelectorAll('.product-input');
-            const precios = {
-                "Producto 1": 10,
-                "Producto 2": 20,
-                "Producto 3": 30,
-                "Producto 4": 40,
-                "Producto 5": 50
-            };
             inputs.forEach(input => {
                 const cantidad = parseInt(input.value);
                 if (cantidad > 0) {
                     const id = input.id;
-                    const productoIndex = id[id.length - 1];
-                    const nombreProducto = `Producto ${productoIndex}`;
-                    const precio = precios[nombreProducto];
+                    const productoIndex = id.substring(8); // Obtener solo el número del contador
+                    const nombreProducto = input.getAttribute('data-nombre');
+                    const precio = parseFloat(input.getAttribute('data-precio'));
                     const total = cantidad * precio;
                     productos.push({
                         nombre: nombreProducto,
@@ -135,6 +122,23 @@
             document.getElementById('cambio').textContent = '0.00';
             alert('Venta registrada correctamente.');
         }
+
+        // Función para agregar el producto a la lista de productos en la interfaz
+        function agregarProductoDom(nombre, precio) {
+            productoIndex++; // Incrementar el contador global
+            const productosContainer = document.getElementById('productos-container');
+            const div = document.createElement('div');
+            div.classList.add('product-container');
+            div.innerHTML = `
+                <button data-precio="${precio}" onclick="incrementar('contador${productoIndex}', ${precio})">${nombre} (Bs ${precio})</button>
+                <button onclick="decrementar('contador${productoIndex}', ${precio})">-</button>
+                <input type="number" id="contador${productoIndex}" class="product-input" value="0" data-precio="${precio}" data-nombre="${nombre}" readonly>
+            `;
+            productosContainer.appendChild(div);
+        }
+
+        // Cargar productos personalizados al cargar la página
+        cargarProductosPersonalizados();
     </script>
 </body>
 </html>

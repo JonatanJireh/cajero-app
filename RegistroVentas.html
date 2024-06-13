@@ -7,10 +7,10 @@
     <link rel="stylesheet" href="styles.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
     <style>
-        /* CSS para alinear los botones en la parte superior */
+        /* Estilos CSS adicionales */
         .container {
             position: relative;
-            padding-top: 20px; /* Espacio para los botones */
+            padding-top: 20px;
         }
         .header {
             display: flex;
@@ -38,7 +38,7 @@
             color: white;
             cursor: pointer;
             transition: background-color 0.3s;
-            margin-left: 10px; /* Espacio entre los botones */
+            margin-left: 10px;
         }
         .clear-button {
             background-color: #dc3545;
@@ -53,7 +53,19 @@
             background-color: #0056b3;
         }
         .registro-container {
-            margin-top: 20px; /* Espacio después de los botones */
+            margin-top: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+        }
+        th {
+            background-color: #f2f2f2;
         }
     </style>
 </head>
@@ -82,10 +94,10 @@
             </table>
         </div>
         <div class="total-container">
-            <h2>Total recaudado: Bs<span id="totalRecaudado">0</span></h2>
+            <h2>Total recaudado: Bs<span id="totalRecaudado">0.00</span></h2>
         </div>
-        <div class="regresar-container">
-            <a href="index.html" class="regresar-link">Regresar a la aplicación de cajero</a>
+        <div class="botones-container">
+            <button onclick="location.href='index.html';">Volver</button>
         </div>
     </div>
 
@@ -94,21 +106,22 @@
         const ventas = JSON.parse(localStorage.getItem('ventas')) || [];
         const registroVentas = document.getElementById('registro-ventas').getElementsByTagName('tbody')[0];
 
-        // Recorrer todas las ventas y mostrarlas en el registro
-        ventas.forEach((venta, index) => {
-            const tr = document.createElement('tr');
-            const productosHTML = venta.productos.map(producto => `${producto.nombre} (${producto.cantidad})`).join(', ');
-            tr.innerHTML = `
-                <td>${index + 1}</td>
-                <td>${productosHTML}</td>
-                <td>Bs${venta.total}</td>
-            `;
-            registroVentas.appendChild(tr);
-        });
+// Recorrer todas las ventas y mostrarlas en la tabla
+ventas.forEach((venta, index) => {
+    const tr = document.createElement('tr');
+    const productosHTML = venta.productos.map(producto => `${producto.nombre} (${producto.cantidad})`).join('<br>');
+    tr.innerHTML = `
+        <td>${index + 1}</td>
+        <td>${productosHTML}</td>
+        <td>Bs${venta.total.toFixed(2)}</td>
+    `;
+    registroVentas.appendChild(tr);
+});
+
 
         // Mostrar el total recaudado
         const totalRecaudado = ventas.reduce((acc, venta) => acc + venta.total, 0);
-        document.getElementById('totalRecaudado').textContent = totalRecaudado;
+        document.getElementById('totalRecaudado').textContent = totalRecaudado.toFixed(2);
 
         // Función para limpiar las ventas del localStorage
         function clearVentas() {
