@@ -17,6 +17,22 @@
             <label for="precioProducto">Precio del Producto (Bs):</label>
             <input type="number" id="precioProducto" placeholder="Precio del Producto">
             <button onclick="agregarProducto()">Agregar Producto</button>
+
+            <!-- Tabla para mostrar los productos -->
+            <table id="tablaProductos">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Nombre</th>
+                        <th>Precio (Bs)</th>
+                        <th>Acciones</th> <!-- Columna para botón de eliminar -->
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Aquí se llenarán los productos -->
+                </tbody>
+            </table>
+
             <div class="botones-container">
                 <button onclick="location.href='index.html';">Volver</button>
             </div>
@@ -26,10 +42,21 @@
     <script>
         let productoIndex = 5;
 
-        // Función para cargar productos personalizados desde localStorage
+        // Función para cargar productos personalizados desde localStorage y mostrar en la tabla
         function cargarProductosPersonalizados() {
             const productosPersonalizados = JSON.parse(localStorage.getItem('productosPersonalizados')) || [];
-            productosPersonalizados.forEach(producto => agregarProductoDom(producto.nombre, producto.precio, producto.index));
+            const tablaProductos = document.getElementById('tablaProductos').getElementsByTagName('tbody')[0];
+            tablaProductos.innerHTML = ''; // Limpiar tabla
+
+            productosPersonalizados.forEach((producto, index) => {
+                const row = tablaProductos.insertRow();
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>${producto.nombre}</td>
+                    <td>${producto.precio}</td>
+                    <td><button onclick="eliminarProducto(${index})">Eliminar</button></td>
+                `;
+            });
         }
 
         // Función para guardar productos personalizados en localStorage
@@ -58,13 +85,25 @@
 
             alert('Producto agregado correctamente.');
 
-            // Limpiar campos
+            // Limpiar campos y actualizar tabla
             document.getElementById('nombreProducto').value = '';
             document.getElementById('precioProducto').value = '';
+            cargarProductosPersonalizados();
 
             // Agregar el producto en la interfaz de index.html (si está abierto)
             if (window.opener) {
                 window.opener.agregarProductoDom(nombre, precio, productoIndex);
+            }
+        }
+
+        // Función para eliminar un producto personalizado por su índice
+        function eliminarProducto(index) {
+            if (confirm('¿Estás seguro de que quieres eliminar este producto?')) {
+                let productosPersonalizados = JSON.parse(localStorage.getItem('productosPersonalizados')) || [];
+                productosPersonalizados = productosPersonalizados.filter((producto, i) => i !== index);
+                localStorage.setItem('productosPersonalizados', JSON.stringify(productosPersonalizados));
+                cargarProductosPersonalizados(); // Actualizar la tabla después de eliminar
+                alert('Producto eliminado correctamente.');
             }
         }
 
