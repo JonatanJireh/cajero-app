@@ -9,7 +9,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>Aplicación de Cajero</h1>
+            <h1>Cajero</h1>
             <img src="cajero.jpg" alt="Cajero" class="cajero-image">
         </div>
         <div class="botones-arriba-container">
@@ -17,7 +17,15 @@
             <div class="boton-arriba"><button onclick="location.href='TotalGeneral2.html';" class="ver-total">Ver Total General</button></div>
         </div>
         <div id="productos-container">
-            <!-- Aquí se cargarán dinámicamente los productos -->
+            <div class="productos-column" id="bebidas-column">
+                <h2>Bebidas</h2>
+            </div>
+            <div class="productos-column" id="salados-column">
+                <h2>Salados</h2>
+            </div>
+            <div class="productos-column" id="masitas-column">
+                <h2>Masitas</h2>
+            </div>
         </div>
         <div class="total-container">
             <h2>Total: Bs<span id="total">0.00</span></h2>
@@ -36,21 +44,17 @@
     </div>
 
     <script>
-        // Contador global para identificar productos personalizados
         let productoIndex = 0;
 
-        // Función para cargar productos personalizados desde localStorage
         function cargarProductosPersonalizados() {
             const productosPersonalizados = JSON.parse(localStorage.getItem('productosPersonalizados')) || [];
-            productosPersonalizados.forEach(producto => agregarProductoDom(producto.nombre, producto.precio, producto.index));
+            productosPersonalizados.forEach(producto => agregarProductoDom(producto.nombre, producto.precio, producto.tipo, producto.index));
         }
 
-        // Función para guardar productos personalizados en localStorage
         function guardarProductosPersonalizados(productos) {
             localStorage.setItem('productosPersonalizados', JSON.stringify(productos));
         }
 
-        // Función para incrementar el valor del input
         function incrementar(idInput, precio) {
             const input = document.getElementById(idInput);
             const valor = parseInt(input.value);
@@ -58,7 +62,6 @@
             actualizarTotal(precio);
         }
 
-        // Función para decrementar el valor del input
         function decrementar(idInput, precio) {
             const input = document.getElementById(idInput);
             const valor = parseInt(input.value);
@@ -68,7 +71,6 @@
             }
         }
 
-        // Función para actualizar el total
         function actualizarTotal(precio) {
             const totalElement = document.getElementById('total');
             let total = parseFloat(totalElement.textContent);
@@ -76,7 +78,6 @@
             totalElement.textContent = total.toFixed(2);
         }
 
-        // Función para calcular el cambio
         function calcularCambio() {
             const total = parseFloat(document.getElementById('total').textContent);
             const efectivo = parseFloat(document.getElementById('efectivo').value);
@@ -84,7 +85,6 @@
             document.getElementById('cambio').textContent = cambio.toFixed(2);
         }
 
-        // Función para registrar la venta
         function registrarVenta() {
             const productos = [];
             const inputs = document.querySelectorAll('.product-input');
@@ -92,7 +92,7 @@
                 const cantidad = parseInt(input.value);
                 if (cantidad > 0) {
                     const id = input.id;
-                    const productoIndex = id.substring(8); // Obtener solo el número del contador
+                    const productoIndex = id.substring(8);
                     const nombreProducto = input.getAttribute('data-nombre');
                     const precio = parseFloat(input.getAttribute('data-precio'));
                     const total = cantidad * precio;
@@ -115,7 +115,6 @@
             ventas.push(venta);
             localStorage.setItem('ventas', JSON.stringify(ventas));
 
-            // Limpiar los inputs
             inputs.forEach(input => input.value = 0);
             document.getElementById('total').textContent = '0.00';
             document.getElementById('efectivo').value = '';
@@ -123,10 +122,10 @@
             alert('Venta registrada correctamente.');
         }
 
-        // Función para agregar el producto a la lista de productos en la interfaz
-        function agregarProductoDom(nombre, precio) {
-            productoIndex++; // Incrementar el contador global
-            const productosContainer = document.getElementById('productos-container');
+        function agregarProductoDom(nombre, precio, tipo, index) {
+            productoIndex = index;
+            const columnId = tipo === 'salado' ? 'salados-column' : tipo === 'masita' ? 'masitas-column' : 'bebidas-column';
+            const productosContainer = document.getElementById(columnId);
             const div = document.createElement('div');
             div.classList.add('product-container');
             div.innerHTML = `
@@ -137,7 +136,6 @@
             productosContainer.appendChild(div);
         }
 
-        // Cargar productos personalizados al cargar la página
         cargarProductosPersonalizados();
     </script>
 </body>

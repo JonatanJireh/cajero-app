@@ -16,99 +16,99 @@
             <input type="text" id="nombreProducto" placeholder="Nombre del Producto">
             <label for="precioProducto">Precio del Producto (Bs):</label>
             <input type="number" id="precioProducto" placeholder="Precio del Producto">
+            <label for="tipoProducto">Tipo de Producto:</label>
+            <select id="tipoProducto">
+                <option value="salado">Salado</option>
+                <option value="masita">Masita</option>
+                <option value="bebida">Bebida</option>
+            </select>
             <button onclick="agregarProducto()">Agregar Producto</button>
-
-            <!-- Tabla para mostrar los productos -->
-            <table id="tablaProductos">
+        </div>
+        <div class="botones-container">
+            <button onclick="location.href='index.html';">Volver al Inicio</button>
+        </div>
+        <div class="productos-lista-container">
+            <h2>Productos Agregados</h2>
+            <table>
                 <thead>
                     <tr>
-                        <th>#</th>
                         <th>Nombre</th>
-                        <th>Precio (Bs)</th>
-                        <th>Acciones</th> <!-- Columna para botón de eliminar -->
+                        <th>Precio</th>
+                        <th>Tipo</th>
+                        <th>Acciones</th>
                     </tr>
                 </thead>
-                <tbody>
-                    <!-- Aquí se llenarán los productos -->
+                <tbody id="productos-lista">
+                    <!-- Aquí se cargarán dinámicamente los productos -->
                 </tbody>
             </table>
-
-            <div class="botones-container">
-                <button onclick="location.href='index.html';">Volver</button>
-            </div>
         </div>
     </div>
 
     <script>
-        let productoIndex = 5;
+        let productoIndex = JSON.parse(localStorage.getItem('productoIndex')) || 0;
 
-        // Función para cargar productos personalizados desde localStorage y mostrar en la tabla
         function cargarProductosPersonalizados() {
             const productosPersonalizados = JSON.parse(localStorage.getItem('productosPersonalizados')) || [];
-            const tablaProductos = document.getElementById('tablaProductos').getElementsByTagName('tbody')[0];
-            tablaProductos.innerHTML = ''; // Limpiar tabla
-
-            productosPersonalizados.forEach((producto, index) => {
-                const row = tablaProductos.insertRow();
-                row.innerHTML = `
-                    <td>${index + 1}</td>
-                    <td>${producto.nombre}</td>
-                    <td>${producto.precio}</td>
-                    <td><button onclick="eliminarProducto(${index})">Eliminar</button></td>
-                `;
-            });
+            productosPersonalizados.forEach(producto => agregarProductoDom(producto));
         }
 
-        // Función para guardar productos personalizados en localStorage
-        function guardarProductosPersonalizados(productos) {
-            localStorage.setItem('productosPersonalizados', JSON.stringify(productos));
-        }
-
-        // Función para agregar producto personalizado
         function agregarProducto() {
-            const nombre = document.getElementById('nombreProducto').value.trim();
+            const nombre = document.getElementById('nombreProducto').value;
             const precio = parseFloat(document.getElementById('precioProducto').value);
+            const tipo = document.getElementById('tipoProducto').value;
 
-            if (nombre === '' || isNaN(precio) || precio <= 0) {
-                alert('Por favor, ingresa un nombre y un precio válido para el producto.');
-                return;
-            }
+            if (nombre && precio && tipo) {
+                const producto = {
+                    nombre: nombre,
+                    precio: precio,
+                    tipo: tipo,
+                    index: productoIndex++
+                };
 
-            const productosPersonalizados = JSON.parse(localStorage.getItem('productosPersonalizados')) || [];
-            productoIndex++;
-            productosPersonalizados.push({
-                nombre: nombre,
-                precio: precio,
-                index: productoIndex
-            });
-            localStorage.setItem('productosPersonalizados', JSON.stringify(productosPersonalizados));
-
-            alert('Producto agregado correctamente.');
-
-            // Limpiar campos y actualizar tabla
-            document.getElementById('nombreProducto').value = '';
-            document.getElementById('precioProducto').value = '';
-            cargarProductosPersonalizados();
-
-            // Agregar el producto en la interfaz de index.html (si está abierto)
-            if (window.opener) {
-                window.opener.agregarProductoDom(nombre, precio, productoIndex);
-            }
-        }
-
-        // Función para eliminar un producto personalizado por su índice
-        function eliminarProducto(index) {
-            if (confirm('¿Estás seguro de que quieres eliminar este producto?')) {
-                let productosPersonalizados = JSON.parse(localStorage.getItem('productosPersonalizados')) || [];
-                productosPersonalizados = productosPersonalizados.filter((producto, i) => i !== index);
+                const productosPersonalizados = JSON.parse(localStorage.getItem('productosPersonalizados')) || [];
+                productosPersonalizados.push(producto);
                 localStorage.setItem('productosPersonalizados', JSON.stringify(productosPersonalizados));
-                cargarProductosPersonalizados(); // Actualizar la tabla después de eliminar
-                alert('Producto eliminado correctamente.');
+                localStorage.setItem('productoIndex', JSON.stringify(productoIndex));
+
+                agregarProductoDom(producto);
+
+                alert('Producto agregado correctamente.');
+                document.getElementById('nombreProducto').value = '';
+                document.getElementById('precioProducto').value = '';
+                document.getElementById('tipoProducto').value = 'salado';
+            } else {
+                alert('Por favor, complete todos los campos.');
             }
         }
 
-        // Cargar productos personalizados al cargar la página
-        cargarProductosPersonalizados();
+        function agregarProductoDom(producto) {
+            const productosLista = document.getElementById('productos-lista');
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${producto.nombre}</td>
+                <td>Bs ${producto.precio.toFixed(2)}</td>
+                <td>${producto.tipo.charAt(0).toUpperCase() + producto.tipo.slice(1)}</td>
+                <td><button onclick="eliminarProducto(${producto.index})">Eliminar</button></td>
+            `;
+            productosLista.appendChild(row);
+        }
+
+        function eliminarProducto(index) {
+            let productosPersonalizados = JSON.parse(localStorage.getItem('productosPersonalizados')) || [];
+            productosPersonalizados = productosPersonalizados.filter(producto => producto.index !== index);
+            localStorage.setItem('productosPersonalizados', JSON.stringify(productosPersonalizados));
+            cargarListaProductos();
+        }
+
+        function cargarListaProductos() {
+            const productosLista = document.getElementById('productos-lista');
+            productosLista.innerHTML = '';
+            const productosPersonalizados = JSON.parse(localStorage.getItem('productosPersonalizados')) || [];
+            productosPersonalizados.forEach(producto => agregarProductoDom(producto));
+        }
+
+        window.onload = cargarListaProductos;
     </script>
 </body>
 </html>
